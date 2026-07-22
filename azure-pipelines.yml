@@ -12,9 +12,7 @@ steps:
     terraformVersion: 'latest'
 
 # 🔹 Terraform Format
-- script: |
-    echo "Running Terraform Format"
-    terraform fmt -recursive
+- script: terraform fmt -recursive
   displayName: "Terraform Format Check"
 
 # 🔹 Terraform Init
@@ -30,9 +28,21 @@ steps:
     backendAzureRmContainerName: 'canttest'
     backendAzureRmKey: 'pipe.tfstate'
 
+# 🔹 Install TFLint
+- script: |
+    echo "Installing TFLint"
+    curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
+  displayName: "Install TFLint"
+
+# 🔹 Run TFLint (Lint Step)
+- script: |
+    echo "Running TFLint"
+    tflint
+  displayName: "Terraform Lint Check"
+
 # 🔹 Terraform Plan
 - task: TerraformTask@5
-  displayName: "Terraform Plan (Preview Infrastructure Changes)"
+  displayName: "Terraform Plan"
   inputs:
     provider: 'azurerm'
     command: 'plan'
@@ -40,10 +50,9 @@ steps:
 
 # 🔹 Terraform Apply
 - task: TerraformTask@5
-  displayName: "Terraform Apply (Auto Approve Deployment)"
+  displayName: "Terraform Apply (Auto Approve)"
   inputs:
     provider: 'azurerm'
     command: 'apply'
     environmentServiceNameAzureRM: 'avtsrv'
     commandOptions: '-auto-approve'
-
