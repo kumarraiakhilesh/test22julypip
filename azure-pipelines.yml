@@ -45,15 +45,17 @@ steps:
 
     Write-Host "Installing TFsec"
 
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
     Invoke-WebRequest `
-    -Uri https://github.com/aquasecurity/tfsec/releases/latest/download/tfsec_windows_amd64.exe `
-    -OutFile tfsec.exe
+    -Uri "https://github.com/aquasecurity/tfsec/releases/latest/download/tfsec-windows-amd64.exe" `
+    -OutFile "C:\tfsec.exe"
 
-    echo "##vso[task.prependpath]$(System.DefaultWorkingDirectory)"
+    echo "##vso[task.prependpath]C:\"
 
-    Write-Host "TFsec Installed"
+    Write-Host "TFsec Installation Completed"
 
-    .\tfsec.exe --version
+    tfsec.exe --version
 
   displayName: "Install TFsec (Windows)"
 
@@ -63,7 +65,7 @@ steps:
 
     Write-Host "Running TFsec Security Scan"
 
-    tfsec .
+    tfsec.exe .
 
   displayName: "Terraform Security Scan"
 
@@ -75,3 +77,13 @@ steps:
     provider: 'azurerm'
     command: 'plan'
     environmentServiceNameAzureRM: 'avtsrv'
+
+
+# 🔹 Terraform Apply (Optional)
+# - task: TerraformTask@5
+#   displayName: "Terraform Apply"
+#   inputs:
+#     provider: 'azurerm'
+#     command: 'apply'
+#     environmentServiceNameAzureRM: 'avtsrv'
+#     commandOptions: '-auto-approve'
