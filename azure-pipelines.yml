@@ -1,7 +1,7 @@
 trigger: none
 
 pool:
-  name: avriti   # आपका self-hosted Windows agent
+  name: avriti   # Self-hosted Windows Agent
 
 steps:
 
@@ -13,15 +13,17 @@ steps:
 
 
 # 🔹 Terraform Format
-- script: |
-    echo Running Terraform Format
+- powershell: |
+    Write-Host "Running Terraform Format"
+
     terraform fmt -recursive
-  displayName: "Terraform Format Check"
+
+  displayName: "Terraform Format"
 
 
-# 🔹 Terraform Init
+# 🔹 Terraform Init (Backend Setup)
 - task: TerraformTask@5
-  displayName: "Terraform Init (Backend Setup)"
+  displayName: "Terraform Init"
   inputs:
     provider: 'azurerm'
     command: 'init'
@@ -34,33 +36,40 @@ steps:
 
 
 # 🔹 Terraform Validate
-- script: |
-    echo Running Terraform Validate
+- powershell: |
+    Write-Host "Running Terraform Validate"
+
     terraform validate
+
   displayName: "Terraform Validate"
 
 
-# 🔹 Install TFsec (Windows)
+# 🔹 Install TFsec
 - powershell: |
 
     Write-Host "Installing TFsec"
 
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
+    $tfsecPath = "$(Agent.TempDirectory)\tfsec.exe"
+
     Invoke-WebRequest `
     -Uri "https://github.com/aquasecurity/tfsec/releases/latest/download/tfsec-windows-amd64.exe" `
-    -OutFile "C:\tfsec.exe"
+    -OutFile $tfsecPath `
+    -UseBasicParsing
 
-    echo "##vso[task.prependpath]C:\"
 
-    Write-Host "TFsec Installation Completed"
+    echo "##vso[task.prependpath]$(Agent.TempDirectory)"
+
+    Write-Host "TFsec Installed"
 
     tfsec.exe --version
 
-  displayName: "Install TFsec (Windows)"
+
+  displayName: "Install TFsec"
 
 
-# 🔹 Run TFsec Security Scan
+# 🔹 Terraform Security Scan
 - powershell: |
 
     Write-Host "Running TFsec Security Scan"
@@ -77,13 +86,14 @@ steps:
     provider: 'azurerm'
     command: 'plan'
     environmentServiceNameAzureRM: 'avtsrv'
+    commandOptions: '-out=tfplan'
 
 
-# 🔹 Terraform Apply (Optional)
-# - task: TerraformTask@5
-#   displayName: "Terraform Apply"
-#   inputs:
-#     provider: 'azurerm'
-#     command: 'apply'
-#     environmentServiceNameAzureRM: 'avtsrv'
-#     commandOptions: '-auto-approve'
+# 🔹 Terraform Apply
+- task: TerraformTask@5
+  displayName: "Terraform Apply"
+  inputs:
+    provider: 'azurerm'
+    command: 'apply'
+    environmentServiceNameAzureRM: 'avtsrv'
+    commandOptions: 'tfplan'
