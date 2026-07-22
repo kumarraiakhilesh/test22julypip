@@ -1,0 +1,49 @@
+trigger: none
+
+pool:
+  name: avriti
+
+steps:
+
+# 🔹 Install Terraform
+- task: TerraformInstaller@1
+  displayName: "Install Terraform CLI"
+  inputs:
+    terraformVersion: 'latest'
+
+# 🔹 Terraform Format
+- script: |
+    echo "Running Terraform Format"
+    terraform fmt -recursive
+  displayName: "Terraform Format Check"
+
+# 🔹 Terraform Init
+- task: TerraformTask@5
+  displayName: "Terraform Init (Backend Setup)"
+  inputs:
+    provider: 'azurerm'
+    command: 'init'
+    backendServiceArm: 'avtsrv'
+    backendAzureRmOverrideSubscriptionID: '18ed265f-7186-4239-bed6-23429dea97a7'
+    backendAzureRmResourceGroupName: 'backendtest'
+    backendAzureRmStorageAccountName: 'akhileshtest'
+    backendAzureRmContainerName: 'canttest'
+    backendAzureRmKey: 'pipe.tfstate'
+
+# 🔹 Terraform Plan
+- task: TerraformTask@5
+  displayName: "Terraform Plan (Preview Infrastructure Changes)"
+  inputs:
+    provider: 'azurerm'
+    command: 'plan'
+    environmentServiceNameAzureRM: 'avtsrv'
+
+# 🔹 Terraform Apply
+- task: TerraformTask@5
+  displayName: "Terraform Apply (Auto Approve Deployment)"
+  inputs:
+    provider: 'azurerm'
+    command: 'apply'
+    environmentServiceNameAzureRM: 'avtsrv'
+    commandOptions: '-auto-approve'
+
