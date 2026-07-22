@@ -40,36 +40,32 @@ steps:
   displayName: "Terraform Validate"
 
 
-# 🔹 Install TFLint (Windows)
+# 🔹 Install TFsec (Windows)
 - powershell: |
 
-    Write-Host "Installing TFLint"
+    Write-Host "Installing TFsec"
 
     Invoke-WebRequest `
-    -Uri https://github.com/terraform-linters/tflint/releases/latest/download/tflint_windows_amd64.zip `
-    -OutFile tflint.zip
+    -Uri https://github.com/aquasecurity/tfsec/releases/latest/download/tfsec_windows_amd64.exe `
+    -OutFile tfsec.exe
 
-    Expand-Archive tflint.zip -DestinationPath C:\tflint -Force
+    echo "##vso[task.prependpath]$(System.DefaultWorkingDirectory)"
 
-    # Add TFLint to Azure DevOps PATH
-    echo "##vso[task.prependpath]C:\tflint"
+    Write-Host "TFsec Installed"
 
-    Write-Host "TFLint Installed"
+    .\tfsec.exe --version
 
-    tflint --version
-
-  displayName: "Install TFLint (Windows)"
+  displayName: "Install TFsec (Windows)"
 
 
-# 🔹 Run TFLint
+# 🔹 Run TFsec Security Scan
 - powershell: |
 
-    Write-Host "Running Terraform Lint"
+    Write-Host "Running TFsec Security Scan"
 
-    tflint --init
-    tflint
+    tfsec .
 
-  displayName: "Terraform Lint Check"
+  displayName: "Terraform Security Scan"
 
 
 # 🔹 Terraform Plan
