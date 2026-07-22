@@ -48,11 +48,11 @@ steps:
     command: 'plan'
     environmentServiceNameAzureRM: 'avtsrv'
 
-# 🔹 Terraform Apply
-- task: TerraformTask@5
-  displayName: "Terraform Apply (Auto Approve)"
-  inputs:
-    provider: 'azurerm'
-    command: 'apply'
-    environmentServiceNameAzureRM: 'avtsrv'
-    commandOptions: '-auto-approve'
+# # 🔹 Terraform Apply
+# - task: TerraformTask@5
+#   displayName: "Terraform Apply (Auto Approve)"
+#   inputs:
+#     provider: 'azurerm'
+#     command: 'apply'
+#     environmentServiceNameAzureRM: 'avtsrv'
+#     commandOptions: '-auto-approve'
