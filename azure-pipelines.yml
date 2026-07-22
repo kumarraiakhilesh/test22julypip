@@ -61,18 +61,16 @@ steps:
   displayName: "Install TFLint (Windows)"
 
 
-# 🔹 TFLint Quality Check
+# 🔹 Run TFLint
 - powershell: |
 
-    Write-Host "Initializing TFLint Plugins"
+    Write-Host "Running Terraform Lint"
 
     tflint --init
-
-    Write-Host "Running Terraform Lint Check"
-
     tflint
 
   displayName: "Terraform Lint Check"
+
 
 # 🔹 Terraform Plan
 - task: TerraformTask@5
@@ -81,13 +79,3 @@ steps:
     provider: 'azurerm'
     command: 'plan'
     environmentServiceNameAzureRM: 'avtsrv'
-
-
-# 🔹 Terraform Apply
-# - task: TerraformTask@5
-#   displayName: "Terraform Apply (Auto Approve)"
-#   inputs:
-#     provider: 'azurerm'
-#     command: 'apply'
-#     environmentServiceNameAzureRM: 'avtsrv'
-#     commandOptions: '-auto-approve'
